@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rincian Kebutuhan Customer - Instala.id</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-slate-100 p-4 md:p-8 font-sans">
+
+    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Form Input & Daftar Simpan (Kiri) -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">Input Data Customer</h2>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Customer</label>
+                        <input type="text" id="custName" oninput="updatePreview()" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan nama customer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+                        <input type="date" id="docDate" onchange="updatePreview()" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <!-- Input Upload File QRIS Manual -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Upload Gambar QRIS (Opsional)</label>
+                        <input type="file" id="qrisInput" accept="image/*" onchange="handleQrisUpload(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin menampilkan QRIS.</p>
+                    </div>
+                </div>
+
+                <!-- Form Tambah Barang -->
+                <div class="mt-5 pt-4 border-t">
+                    <h3 class="text-sm font-bold text-slate-800 mb-2">Tambah Barang</h3>
+                    <div class="space-y-2">
+                        <input type="text" id="itemName" placeholder="Nama Barang" class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="itemQty" value="1" min="1" placeholder="Qty" class="px-3 py-1.5 border rounded-lg text-xs outline-none">
+                            <input type="number" id="itemPrice" placeholder="Harga Satuan" class="px-3 py-1.5 border rounded-lg text-xs outline-none">
+                        </div>
+                        <button onclick="addItem()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-1.5 rounded-lg text-xs transition">+ Tambah Ke Daftar</button>
+                    </div>
+                </div>
+
+                <!-- Tombol Tunggal Simpan & Unduh -->
+                <div class="mt-4 pt-4 border-t">
+                    <button onclick="saveAndDownload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-sm flex items-center justify-center gap-2">
+                        <span>💾</span> Simpan & Unduh Gambar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Daftar Riwayat / Data Tersimpan -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 mb-3">Daftar Rincian Tersimpan</h3>
+                <div id="savedList" class="space-y-2 max-h-60 overflow-y-auto text-xs">
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Preview Struk / Nota (Kanan) -->
+        <div class="lg:col-span-7">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">Preview Nota / Rincian</h2>
+
+                <!-- Template Gambar yang Akan Di-screenshot -->
+                <div id="receiptCard" class="bg-white p-6 border rounded-lg space-y-4">
+                    <div class="flex justify-between items-start border-b pb-4">
+                        <div>
+                            <h1 class="text-xl font-extrabold text-slate-800 uppercase tracking-wide">RINCIAN KEBUTUHAN</h1>
+                            <p class="text-xs text-slate-500">Nota Pemesanan Barang Instala.id</p>
+                        </div>
+                        <div class="text-right text-xs text-slate-600 space-y-1">
+                            <p><span class="font-semibold">Customer:</span> <span id="prevName" class="font-bold text-slate-800">-</span></p>
+                            <p><span class="font-semibold">Tanggal:</span> <span id="prevDate">-</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Item -->
+                    <table class="w-full text-xs text-left">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
+                                <th class="p-2 w-8 text-center">No</th>
+                                <th class="p-2">Nama Barang</th>
+                                <th class="p-2 w-16 text-center">Qty</th>
+                                <th class="p-2 w-28 text-right">Harga Satuan</th>
+                                <th class="p-2 w-28 text-right">Jumlah</th>
+                                <th class="p-2 w-8 text-center no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemTableBody" class="divide-y">
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-bold text-slate-800 border-t-2">
+                                <td colspan="4" class="p-2 text-right">TOTAL</td>
+                                <td id="grandTotal" class="p-2 text-right text-blue-600 text-sm">Rp 0</td>
+                                <td class="no-print"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <!-- Info Transfer & QRIS Kondisional -->
+                    <div class="bg-slate-50 p-3 rounded-lg border text-xs flex justify-between items-center gap-4">
+                        <div class="flex-1">
+                            <p class="font-semibold text-slate-700 mb-1">Info Pembayaran / Transfer:</p>
+                            <p class="text-slate-600 leading-relaxed">                  
+                                BCA : Suhendra Kusnanto : 037 426 5641
+                            </p>
+                        </div>
+                        <!-- Area QRIS (Disembunyikan jika tidak ada gambar) -->
+                        <div id="qrisBlock" class="text-center flex-shrink-0 hidden">
+                            <div class="bg-white p-1.5 border rounded-lg shadow-sm inline-block">
+                                <img id="qrisImg" src="" alt="QRIS" class="w-24 h-24 object-contain">
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 block mt-1">SCAN QRIS MASUHE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let items = [
+            { name: 'Contoh Barang A', qty: 1, price: 50000 }
+        ];
+        let currentId = null;
+        let uploadedQrisBase64 = "";
+
+        document.getElementById('docDate').valueAsDate = new Date();
+
+        function handleQrisUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedQrisBase64 = e.target.result;
+                    document.getElementById('qrisImg').src = uploadedQrisBase64;
+                    document.getElementById('qrisBlock').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedQrisBase64 = "";
+                document.getElementById('qrisImg').src = "";
+                document.getElementById('qrisBlock').classList.add('hidden');
+            }
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('custName').value || '-';
+            const date = document.getElementById('docDate').value;
+
+            document.getElementById('prevName').innerText = name;
+            document.getElementById('prevDate').innerText = date ? new Date(date).toLocaleDateString('id-ID') : '-';
+
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('itemTableBody');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            items.forEach((item, index) => {
+                const subtotal = item.qty * item.price;
+                total += subtotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2 text-center font-medium text-slate-500">${index + 1}</td>
+                        <td class="p-2 font-medium text-slate-800">${item.name}</td>
+                        <td class="p-2 text-center text-slate-700">${item.qty}</td>
+                        <td class="p-2 text-right text-slate-700">Rp ${item.price.toLocaleString('id-ID')}</td>
+                        <td class="p-2 text-right font-semibold text-slate-800">Rp ${subtotal.toLocaleString('id-ID')}</td>
+                        <td class="p-2 text-center no-print">
+                            <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-bold text-sm">×</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('grandTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
+
+        function addItem() {
+            const nameInput = document.getElementById('itemName');
+            const qtyInput = document.getElementById('itemQty');
+            const priceInput = document.getElementById('itemPrice');
+
+            if (!nameInput.value) return alert('Mohon isi nama barang!');
+
+            items.push({
+                name: nameInput.value,
+                qty: Number(qtyInput.value) || 1,
+                price: Number(priceInput.value) || 0
+            });
+
+            nameInput.value = '';
+            qtyInput.value = '1';
+            priceInput.value = '';
+
+            renderTable();
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderTable();
+        }
+
+        function saveAndDownload() {
+            const name = document.getElementById('custName').value;
+            if (!name) return alert('Mohon isi nama customer terlebih dahulu!');
+
+            // 1. Simpan Ke LocalStorage (Termasuk Data QRIS Jika Ada)
+            const records = JSON.parse(localStorage.getItem('cust_records') || '[]');
+            const record = {
+                id: currentId || Date.now(),
+                name: name,
+                date: document.getElementById('docDate').value,
+                qris: uploadedQrisBase64,
+                items: items
+            };
+
+            if (currentId) {
+                const idx = records.findIndex(r => r.id === currentId);
+                records[idx] = record;
+            } else {
+                records.push(record);
+            }
+
+            localStorage.setItem('cust_records', JSON.stringify(records));
+            loadSavedList();
+
+            // 2. Export Ke Gambar PNG
+            const element = document.getElementById('receiptCard');
+            document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+
+            html2canvas(element, { scale: 2 }).then(canvas => {
+                document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+
+                const link = document.createElement('a');
+                link.download = `Rincian_${name}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function loadSavedList() {
+            const records = JSON.parse(localStorage.getItem('cust_records') || '[]');
+            const container = document.getElementById('savedList');
+            container.innerHTML = '';
+
+            records.forEach(rec => {
+                container.innerHTML += `
+                    <div class="p-2 border rounded-lg bg-slate-50 flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold text-slate-800">${rec.name}</p>
+                            <p class="text-[10px] text-slate-500">${rec.date}</p>
+                        </div>
+                        <div class="space-x-1">
+                            <button onclick="editData(${rec.id})" class="px-2 py-1 bg-blue-500 text-white rounded text-[10px]">Edit</button>
+                            <button onclick="deleteData(${rec.id})" class="px-2 py-1 bg-red-500 text-white rounded text-[10px]">Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function editData(id) {
+            const records = JSON.parse(localStorage.getItem('cust_records') || '[]');
+            const rec = records.find(r => r.id === id);
+            if (!rec) return;
+
+            currentId = rec.id;
+            document.getElementById('custName').value = rec.name;
+            document.getElementById('docDate').value = rec.date;
+            items = rec.items;
+
+            uploadedQrisBase64 = rec.qris || "";
+            if (uploadedQrisBase64) {
+                document.getElementById('qrisImg').src = uploadedQrisBase64;
+                document.getElementById('qrisBlock').classList.remove('hidden');
+            } else {
+                document.getElementById('qrisImg').src = "";
+                document.getElementById('qrisBlock').classList.add('hidden');
+            }
+
+            updatePreview();
+        }
+
+        function deleteData(id) {
+            let records = JSON.parse(localStorage.getItem('cust_records') || '[]');
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem('cust_records', JSON.stringify(records));
+            loadSavedList();
+        }
+
+        updatePreview();
+        loadSavedList();
+    </script>
+</body>
+</html>
