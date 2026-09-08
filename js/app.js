@@ -1,4 +1,4 @@
-// --- Navigation Tab System & Mobile Toggle ---
+// --- Navigation & Mobile Toggle ---
 function switchTab(tabId, element) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(link => link.classList.remove('active'));
@@ -6,47 +6,160 @@ function switchTab(tabId, element) {
   document.getElementById(tabId).classList.add('active');
   element.classList.add('active');
 
-  // Tutup menu mobile jika terbuka
   document.getElementById('navMenu').classList.remove('active');
-
-  // Panggil muat berita jika tab berita dipilih
-  if (tabId === 'berita') {
-    muatBerita();
-  }
 }
 
 function toggleMobileNav() {
   document.getElementById('navMenu').classList.toggle('active');
 }
 
-// Format IDR Helper
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+// --- 1. JOB SCHEDULE SYSTEM ---
+let dataJadwal = JSON.parse(localStorage.getItem('migu_schedules')) || [];
 
-// --- 1. Kalkulator Finansial ---
-function hitungInvestasi() {
-  const modalAwal = parseFloat(document.getElementById('modalAwal').value) || 0;
-  const setoranBulanan = parseFloat(document.getElementById('setoranBulanan').value) || 0;
-  const returnTahunan = (parseFloat(document.getElementById('returnTahunan').value) || 0) / 100;
-  const durasiTahun = parseInt(document.getElementById('durasiTahun').value) || 0;
-
-  const totalBulan = durasiTahun * 12;
-  const returnBulanan = returnTahunan / 12;
-
-  let totalModal = modalAwal + (setoranBulanan * totalBulan);
-  let nilaiAkhir = modalAwal;
-
-  for (let i = 0; i < totalBulan; i++) {
-    nilaiAkhir = (nilaiAkhir + setoranBulanan) * (1 + returnBulanan);
-  }
-
-  const profit = nilaiAkhir - totalModal;
-
-  document.getElementById('outTotalModal').innerText = formatRupiah(totalModal);
-  document.getElementById('outProfit').innerText = formatRupiah(profit);
-  document.getElementById('outTotalAkhir').innerText = formatRupiah(nilaiAkhir);
+function simpanJadwalKeStorage() {
+  localStorage.setItem('migu_schedules', JSON.stringify(dataJadwal));
+  renderJadwal();
 }
 
-// --- 2. Subnet Calculator ---
+function tambahJadwal(e) {
+  e.preventDefault();
+  const judul = document.getElementById('judulJadwal').value.trim();
+  const kategori = document.getElementById('kategoriJadwal').value;
+  const tgl = document.getElementById('tglJadwal').value;
+  const jam = document.getElementById('jamJadwal').value;
+  const prioritas = document.getElementById('prioritasJadwal').value;
+  const catatan = document.getElementById('catatanJadwal').value.trim();
+
+  const itemBaru = {
+    id: Date.now(),
+    judul,
+    kategori,
+    tgl,
+    jam,
+    prioritas,
+    catatan
+  };
+
+  dataJadwal.push(itemBaru);
+  simpanJadwalKeStorage();
+  document.getElementById('formSchedule').reset();
+}
+
+function hapusJadwal(id) {
+  dataJadwal = dataJadwal.filter(item => item.id !== id);
+  simpanJadwalKeStorage();
+}
+
+function renderJadwal() {
+  const container = document.getElementById('listJadwal');
+  const countEl = document.getElementById('countJadwal');
+  container.innerHTML = '';
+
+  countEl.innerText = `${dataJadwal.length} Agenda`;
+
+  if (dataJadwal.length === 0) {
+    container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">Belum ada agenda kerja yang dicatat.</p>';
+    return;
+  }
+
+  // Urutkan jadwal berdasarkan tanggal & jam terdekat
+  dataJadwal.sort((a, b) => new Date(`${a.tgl}T${a.jam}`) - new Date(`${b.tgl}T${b.jam}`));
+
+  dataJadwal.forEach(item => {
+    const card = document.createElement('div');
+    card.className = `schedule-card priority-${item.prioritas}`;
+    
+    // Format Tanggal Indonesia
+    const tglFormatted = new Date(item.tgl).toLocaleDateString('id-ID', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+
+    card.innerHTML = `
+      <div class="schedule-info">
+        <h4>${item.judul}</h4>
+        <div class="schedule-meta">
+          <span class="tag">${item.kategori}</span>
+          <span>📅 ${tglFormatted}</span>
+          <span>⏰ ${item.jam} WIB</span>
+          <span style="font-weight:700;">• ${item.prioritas}</span>
+        </div>
+        ${item.catatan ? `<div class="schedule-note">📝 ${item.catatan}</div>` : ''}
+      </div>
+      <button class="btn-delete" onclick="hapusJadwal(${item.id})" title="Hapus Agenda">&times;</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// --- 2. TASK LIST SYSTEM ---
+let dataTugas = JSON.parse(localStorage.getItem('migu_tasks')) || [];
+
+function simpanTugasKeStorage() {
+  localStorage.setItem('migu_tasks', JSON.stringify(dataTugas));
+  renderTugas();
+}
+
+function tambahTugas(e) {
+  e.preventDefault();
+  const teks = document.getElementById('teksTugas').value.trim();
+  if (!teks) return;
+
+  dataTugas.push({
+    id: Date.now(),
+    teks,
+    selesai: false
+  });
+
+  simpanTugasKeStorage();
+  document.getElementById('formTask').reset();
+}
+
+function toggleStatusTugas(id) {
+  dataTugas = dataTugas.map(item => {
+    if (item.id === id) item.selesai = !item.selesai;
+    return item;
+  });
+  simpanTugasKeStorage();
+}
+
+function hapusTugas(id) {
+  dataTugas = dataTugas.filter(item => item.id !== id);
+  simpanTugasKeStorage();
+}
+
+function bersihkanTugasSelesai() {
+  dataTugas = dataTugas.filter(item => !item.selesai);
+  simpanTugasKeStorage();
+}
+
+function renderTugas() {
+  const container = document.getElementById('listTugas');
+  container.innerHTML = '';
+
+  const doneCount = dataTugas.filter(t => t.selesai).length;
+  const pendingCount = dataTugas.length - doneCount;
+
+  document.getElementById('taskDoneCount').innerText = doneCount;
+  document.getElementById('taskPendingCount').innerText = pendingCount;
+
+  if (dataTugas.length === 0) {
+    container.innerHTML = '<p style="color: #64748b; font-size: 0.9rem;">Belum ada tugas di daftar To-Do.</p>';
+    return;
+  }
+
+  dataTugas.forEach(item => {
+    const li = document.createElement('li');
+    li.className = `task-item ${item.selesai ? 'done' : ''}`;
+    li.innerHTML = `
+      <input type="checkbox" ${item.selesai ? 'checked' : ''} onchange="toggleStatusTugas(${item.id})">
+      <span>${item.teks}</span>
+      <button class="btn-delete" onclick="hapusTugas(${item.id})">&times;</button>
+    `;
+    container.appendChild(li);
+  });
+}
+
+// --- 3. SUBNET CALCULATOR TOOL ---
 function hitungSubnet() {
   const ip = document.getElementById('ipAddress').value.trim();
   const cidr = parseInt(document.getElementById('cidr').value);
@@ -79,96 +192,13 @@ function hitungSubnet() {
   document.getElementById('outUsableHost').innerText = usableHosts.toLocaleString('id-ID');
 }
 
-// --- 3. Cash Tracker (LocalStorage) ---
-let dataTransaksi = JSON.parse(localStorage.getItem('migu_transaksi')) || [];
-
-function updateTrackerUI() {
-  const listEl = document.getElementById('listTransaksi');
-  listEl.innerHTML = '';
-  let totalSaldo = 0;
-
-  dataTransaksi.forEach((item) => {
-    const li = document.createElement('li');
-    li.className = item.tipe;
-    const tanda = item.tipe === 'masuk' ? '+' : '-';
-    li.innerHTML = `<span>${item.keterangan}</span> <strong>${tanda} ${formatRupiah(item.nominal)}</strong>`;
-    listEl.appendChild(li);
-
-    if (item.tipe === 'masuk') totalSaldo += item.nominal;
-    else totalSaldo -= item.nominal;
-  });
-
-  document.getElementById('outSaldo').innerText = formatRupiah(totalSaldo);
-  localStorage.setItem('migu_transaksi', JSON.stringify(dataTransaksi));
-}
-
-function tambahTransaksi() {
-  const ket = document.getElementById('keterangan').value.trim();
-  const nom = parseFloat(document.getElementById('nominal').value);
-  const tipe = document.getElementById('tipe').value;
-
-  if (!ket || isNaN(nom) || nom <= 0) {
-    alert("Keterangan dan nominal harus diisi dengan benar!");
-    return;
-  }
-
-  dataTransaksi.push({ keterangan: ket, nominal: nom, tipe: tipe });
-  document.getElementById('keterangan').value = '';
-  document.getElementById('nominal').value = '';
-
-  updateTrackerUI();
-}
-
-function hapusSemuaTransaksi() {
-  if (confirm("Hapus seluruh daftar transaksi?")) {
-    dataTransaksi = [];
-    updateTrackerUI();
-  }
-}
-
-// --- 4. Berita API (Menggunakan CORS Proxy Safe) ---
-async function muatBerita() {
-  const container = document.getElementById('news-container');
-  const loading = document.getElementById('loading');
-
-  if (!container || container.children.length > 0) return;
-
-  const targetApi = 'https://api-berita-indonesia.vercel.app/cnn/terbaru/';
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}`;
-
-  try {
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error('Jaringan bermasalah');
-    
-    const wrapperData = await response.json();
-    const result = JSON.parse(wrapperData.contents);
-
-    loading.style.display = 'none';
-
-    result.data.posts.slice(0, 6).forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'news-card';
-      card.innerHTML = `
-        <img src="${item.thumbnail}" alt="Gambar Berita" onerror="this.src='https://via.placeholder.com/320x190?text=Berita+Migu'">
-        <div class="news-card-body">
-          <h3>${item.title}</h3>
-          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">
-            ${new Date(item.pubDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </p>
-          <a href="${item.link}" target="_blank" rel="noopener">Baca Selengkapnya &rarr;</a>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  } catch (error) {
-    console.error('Error berita:', error);
-    loading.innerText = 'Gagal memuat berita terkini. Silakan segarkan halaman.';
-  }
-}
-
-// Inisialisasi awal
+// Inisialisasi Aplikasi saat Load
 document.addEventListener('DOMContentLoaded', () => {
-  hitungInvestasi();
+  renderJadwal();
+  renderTugas();
   hitungSubnet();
-  updateTrackerUI();
+  
+  // Set default tanggal hari ini pada form jadwal
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tglJadwal').value = today;
 });
