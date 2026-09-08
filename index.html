@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Migu Apps — Utility Hub Migunani</title>
+  <title>Migu Task & Schedule — Pengelola Jadwal Kerja</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,97 +14,168 @@
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-container">
-      <a href="#" class="logo-link">
-  <img src="assets/migu_logo.svg" alt="Logo Migu" height="40">
-</a>
+      <a href="#" class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" height="38">
+          <defs>
+            <linearGradient id="miguGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2563EB" />
+              <stop offset="100%" stop-color="#38BDF8" />
+            </linearGradient>
+          </defs>
+          <g fill="none" stroke="url(#miguGrad1)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 35 90 V 52 C 35 38, 55 38, 55 52 V 90 M 55 52 C 55 38, 75 38, 75 52 V 90" />
+            <path d="M 102 56 V 90" />
+            <path d="M 152 56 C 136 56, 126 67, 126 78 C 126 89, 136 98, 152 98 C 165 98, 168 89, 168 78 V 56 M 168 56 V 95 C 168 110, 148 112, 138 108" />
+            <path d="M 195 56 V 82 C 195 96, 222 96, 222 82 V 56" />
+          </g>
+          <circle cx="102" cy="36" r="9" fill="#38BDF8"/>
+          <circle cx="203" cy="69" r="2.5" fill="#1E293B" />
+          <circle cx="214" cy="69" r="2.5" fill="#1E293B" />
+          <path d="M 205 76 Q 208.5 79 212 76" stroke="#1E293B" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </a>
       <button class="mobile-toggle" aria-label="Toggle Navigation" onclick="toggleMobileNav()">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
       <nav class="nav-menu" id="navMenu">
-        <a href="#finansial" class="nav-item active" onclick="switchTab('finansial', this)">Finansial</a>
-        <a href="#network" class="nav-item" onclick="switchTab('network', this)">Subnet IP</a>
-        <a href="#tracker" class="nav-item" onclick="switchTab('tracker', this)">Catatan Kas</a>
-        <a href="#berita" class="nav-item" onclick="switchTab('berita', this)">Berita</a>
+        <a href="#schedule" class="nav-item active" onclick="switchTab('schedule', this)">Jadwal Kerja</a>
+        <a href="#tasks" class="nav-item" onclick="switchTab('tasks', this)">Daftar Tugas (To-Do)</a>
+        <a href="#tools" class="nav-item" onclick="switchTab('tools', this)">Migu Tools</a>
       </nav>
     </div>
   </header>
 
-  <!-- Hero Banner -->
+  <!-- Hero Header -->
   <section class="hero">
     <div class="hero-content">
-      <span class="badge">migunani (adj.) — berguna & bermanfaat</span>
-      <h1>Platform Alat Praktis & Informasi Serbaguna</h1>
-      <p>Ringkas, cepat, dan bekerja langsung dari peramban Anda tanpa perlu registrasi.</p>
+      <span class="badge">migunani — produktif & terorganisir</span>
+      <h1>Kelola Pekerjaan & Jadwal Lebih Efisien</h1>
+      <p>Catat agenda proyek, instalasi, dan tugas harian secara praktis langsung dari browser Anda.</p>
     </div>
   </section>
 
-  <!-- Main Container -->
+  <!-- Main Area -->
   <main class="main-container">
-    
-    <!-- Tab 1: Kalkulator Finansial -->
-    <section id="finansial" class="tab-content active">
+
+    <!-- TAB 1: JADWAL KERJA (JOB SCHEDULE) -->
+    <section id="schedule" class="tab-content active">
       <div class="section-title">
-        <h2>Simulasi Investasi & Dividen</h2>
-        <p>Proyeksikan pertumbuhan aset jangka panjang Anda secara realistis.</p>
+        <h2>Jadwal & Agenda Kerja</h2>
+        <p>Atur tenggat waktu agenda operasional, servis, atau pengerjaan proyek.</p>
       </div>
 
       <div class="grid-layout">
+        <!-- Form Input Schedule -->
         <div class="card form-card">
-          <div class="form-group">
-            <label for="modalAwal">Modal Awal (Rp)</label>
-            <input type="number" id="modalAwal" value="10000000" placeholder="Contoh: 10000000">
-          </div>
-          <div class="form-group">
-            <label for="setoranBulanan">Setoran Bulanan (Rp)</label>
-            <input type="number" id="setoranBulanan" value="500000" placeholder="Contoh: 500000">
-          </div>
-          <div class="form-row">
+          <h3>+ Tambah Agenda Kerja</h3>
+          <form id="formSchedule" onsubmit="tambahJadwal(event)">
             <div class="form-group">
-              <label for="returnTahunan">Return / Yield (%/Thn)</label>
-              <input type="number" id="returnTahunan" value="6" step="0.1">
+              <label for="judulJadwal">Judul Pekerjaan / Agenda</label>
+              <input type="text" id="judulJadwal" placeholder="Contoh: Instalasi Jaringan / Maintenance CCTV" required>
             </div>
             <div class="form-group">
-              <label for="durasiTahun">Durasi (Tahun)</label>
-              <input type="number" id="durasiTahun" value="5">
+              <label for="kategoriJadwal">Kategori</label>
+              <select id="kategoriJadwal">
+                <option value="Servis/Instalasi">Servis / Instalasi</option>
+                <option value="Proyek Network">Proyek Network</option>
+                <option value="Meeting/Kunjungan">Meeting / Kunjungan</option>
+                <option value="Toko & Stok">Toko & Stok</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
             </div>
-          </div>
-          <button class="btn btn-primary" onclick="hitungInvestasi()">Hitung Simulasi</button>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tglJadwal">Tanggal</label>
+                <input type="date" id="tglJadwal" required>
+              </div>
+              <div class="form-group">
+                <label for="jamJadwal">Waktu / Jam</label>
+                <input type="time" id="jamJadwal" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="prioritasJadwal">Prioritas</label>
+              <select id="prioritasJadwal">
+                <option value="Biasa">Biasa</option>
+                <option value="Penting">Penting</option>
+                <option value="Mendesak">Mendesak 🔥</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="catatanJadwal">Catatan Tambahan</label>
+              <input type="text" id="catatanJadwal" placeholder="Lokasi / Kontak Klien / Detail komponen">
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+          </form>
         </div>
 
-        <div class="card result-card">
-          <h3>Ringkasan Hasil Proyeksi</h3>
-          <div class="stat-group">
-            <div class="stat-item">
-              <span class="stat-label">Total Modal Disetor</span>
-              <span class="stat-value" id="outTotalModal">Rp 0</span>
-            </div>
-            <div class="stat-item highlight-green">
-              <span class="stat-label">Estimasi Keuntungan</span>
-              <span class="stat-value" id="outProfit">Rp 0</span>
-            </div>
-            <div class="stat-item highlight-blue">
-              <span class="stat-label">Total Nilai Akhir Aset</span>
-              <span class="stat-value" id="outTotalAkhir">Rp 0</span>
-            </div>
+        <!-- Schedule List Display -->
+        <div class="card display-card">
+          <div class="card-header-flex">
+            <h3>Agenda Mendatang</h3>
+            <span class="counter-badge" id="countJadwal">0 Agenda</span>
           </div>
+          <div id="listJadwal" class="schedule-grid"></div>
         </div>
       </div>
     </section>
 
-    <!-- Tab 2: Subnet Calculator -->
-    <section id="network" class="tab-content">
+    <!-- TAB 2: DAFTAR TUGAS (TASK LIST) -->
+    <section id="tasks" class="tab-content">
+      <div class="section-title">
+        <h2>Daftar Tugas Harian (To-Do)</h2>
+        <p>Catat daftar tugas kecil harian dan tandai jika sudah selesai.</p>
+      </div>
+
+      <div class="grid-layout">
+        <!-- Input Task -->
+        <div class="card form-card">
+          <h3>+ Tugas Baru</h3>
+          <form id="formTask" onsubmit="tambahTugas(event)">
+            <div class="form-group">
+              <label for="teksTugas">Deskripsi Tugas</label>
+              <input type="text" id="teksTugas" placeholder="Contoh: Cek stok switch TP-Link / Restock barang" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah ke Daftar</button>
+          </form>
+
+          <div class="task-summary">
+            <div class="summary-box">
+              <span>Selesai</span>
+              <strong id="taskDoneCount">0</strong>
+            </div>
+            <div class="summary-box">
+              <span>Pending</span>
+              <strong id="taskPendingCount">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task List Display -->
+        <div class="card display-card">
+          <div class="card-header-flex">
+            <h3>Daftar Task</h3>
+            <button class="btn-text-danger" onclick="bersihkanTugasSelesai()">Hapus yang Selesai</button>
+          </div>
+          <ul id="listTugas" class="task-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: MIGU TOOLS (Kalkulator Utilitas) -->
+    <section id="tools" class="tab-content">
       <div class="section-title">
         <h2>Kalkulator Subnet IPv4 (CIDR)</h2>
-        <p>Hitung alokasi blok jaringan dan host subnetting dengan presisi.</p>
+        <p>Perhitungan cepat blok IP jaringan untuk kebutuhan teknis.</p>
       </div>
 
       <div class="grid-layout">
         <div class="card form-card">
           <div class="form-group">
             <label for="ipAddress">IP Address</label>
-            <input type="text" id="ipAddress" value="192.168.1.1" placeholder="e.g. 192.168.1.1">
+            <input type="text" id="ipAddress" value="192.168.1.1">
           </div>
           <div class="form-group">
             <label for="cidr">Prefix CIDR (/)</label>
@@ -113,93 +184,23 @@
           <button class="btn btn-primary" onclick="hitungSubnet()">Kalkulasi Subnet</button>
         </div>
 
-        <div class="card result-card">
-          <h3>Rincian Subnet</h3>
+        <div class="card display-card">
+          <h3>Hasil Subnetting</h3>
           <div class="info-grid">
-            <div class="info-box">
-              <span>Subnet Mask</span>
-              <strong id="outNetmask">-</strong>
-            </div>
-            <div class="info-box">
-              <span>Network Address</span>
-              <strong id="outNetAddr">-</strong>
-            </div>
-            <div class="info-box">
-              <span>Broadcast Address</span>
-              <strong id="outBroadAddr">-</strong>
-            </div>
-            <div class="info-box">
-              <span>Usable Hosts</span>
-              <strong id="outUsableHost">-</strong>
-            </div>
+            <div class="info-box"><span>Netmask</span><strong id="outNetmask">-</strong></div>
+            <div class="info-box"><span>Network Address</span><strong id="outNetAddr">-</strong></div>
+            <div class="info-box"><span>Broadcast Address</span><strong id="outBroadAddr">-</strong></div>
+            <div class="info-box"><span>Usable Hosts</span><strong id="outUsableHost">-</strong></div>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Tab 3: Cash Tracker -->
-    <section id="tracker" class="tab-content">
-      <div class="section-title">
-        <h2>Pencatat Kas Ringkas</h2>
-        <p>Kelola arus masuk dan keluar keuangan harian tanpa rumit.</p>
-      </div>
-
-      <div class="grid-layout">
-        <div class="card form-card">
-          <div class="form-group">
-            <label for="keterangan">Keterangan Transaksi</label>
-            <input type="text" id="keterangan" placeholder="Contoh: Honor Freelance, Bensin">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="nominal">Nominal (Rp)</label>
-              <input type="number" id="nominal" placeholder="0">
-            </div>
-            <div class="form-group">
-              <label for="tipe">Tipe</label>
-              <select id="tipe">
-                <option value="masuk">Pemasukan (+)</option>
-                <option value="keluar">Pengeluaran (-)</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="tambahTransaksi()">Tambah Transaksi</button>
-        </div>
-
-        <div class="card history-card">
-          <div class="history-header">
-            <h3>Riwayat Transaksi</h3>
-            <div class="saldo-badge">
-              <span>Saldo Net:</span>
-              <strong id="outSaldo">Rp 0</strong>
-            </div>
-          </div>
-          <ul id="listTransaksi" class="transaksi-list"></ul>
-          <button class="btn btn-danger" onclick="hapusSemuaTransaksi()">Bersihkan Semua Data</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tab 4: Berita Dinamis -->
-    <section id="berita" class="tab-content">
-      <div class="section-title">
-        <h2>Berita Terkini Indonesia</h2>
-        <p>Pantau sajian kabar berita terbaru secara real-time.</p>
-      </div>
-      <div id="loading" class="loading-state">
-        <div class="spinner"></div>
-        <span>Memuat kabar berita terbaru...</span>
-      </div>
-      <div id="news-container" class="news-grid"></div>
     </section>
 
   </main>
 
   <!-- Footer -->
   <footer class="footer">
-    <div class="footer-container">
-      <p>&copy; 2026 <strong>migu.my.id</strong> — Dirancang untuk memberikan manfaat praktis.</p>
-    </div>
+    <p>&copy; 2026 <strong>migu.my.id</strong> — Solusi Manajemen Jadwal Praktis & Migunani.</p>
   </footer>
 
   <script src="js/app.js"></script>
