@@ -1,5 +1,207 @@
-<section id="berita" class="container">
-  <h2>Berita Terkini Indonesia</h2>
-  <div id="loading">Memuat berita terbaru...</div>
-  <div id="news-container" class="news-grid"></div>
-</section>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migu Apps — Utility Hub Migunani</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo-link">
+  <img src="assets/migu_logo.svg" alt="Logo Migu" height="40">
+</a>
+      <button class="mobile-toggle" aria-label="Toggle Navigation" onclick="toggleMobileNav()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <a href="#finansial" class="nav-item active" onclick="switchTab('finansial', this)">Finansial</a>
+        <a href="#network" class="nav-item" onclick="switchTab('network', this)">Subnet IP</a>
+        <a href="#tracker" class="nav-item" onclick="switchTab('tracker', this)">Catatan Kas</a>
+        <a href="#berita" class="nav-item" onclick="switchTab('berita', this)">Berita</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="badge">migunani (adj.) — berguna & bermanfaat</span>
+      <h1>Platform Alat Praktis & Informasi Serbaguna</h1>
+      <p>Ringkas, cepat, dan bekerja langsung dari peramban Anda tanpa perlu registrasi.</p>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    
+    <!-- Tab 1: Kalkulator Finansial -->
+    <section id="finansial" class="tab-content active">
+      <div class="section-title">
+        <h2>Simulasi Investasi & Dividen</h2>
+        <p>Proyeksikan pertumbuhan aset jangka panjang Anda secara realistis.</p>
+      </div>
+
+      <div class="grid-layout">
+        <div class="card form-card">
+          <div class="form-group">
+            <label for="modalAwal">Modal Awal (Rp)</label>
+            <input type="number" id="modalAwal" value="10000000" placeholder="Contoh: 10000000">
+          </div>
+          <div class="form-group">
+            <label for="setoranBulanan">Setoran Bulanan (Rp)</label>
+            <input type="number" id="setoranBulanan" value="500000" placeholder="Contoh: 500000">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="returnTahunan">Return / Yield (%/Thn)</label>
+              <input type="number" id="returnTahunan" value="6" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="durasiTahun">Durasi (Tahun)</label>
+              <input type="number" id="durasiTahun" value="5">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="hitungInvestasi()">Hitung Simulasi</button>
+        </div>
+
+        <div class="card result-card">
+          <h3>Ringkasan Hasil Proyeksi</h3>
+          <div class="stat-group">
+            <div class="stat-item">
+              <span class="stat-label">Total Modal Disetor</span>
+              <span class="stat-value" id="outTotalModal">Rp 0</span>
+            </div>
+            <div class="stat-item highlight-green">
+              <span class="stat-label">Estimasi Keuntungan</span>
+              <span class="stat-value" id="outProfit">Rp 0</span>
+            </div>
+            <div class="stat-item highlight-blue">
+              <span class="stat-label">Total Nilai Akhir Aset</span>
+              <span class="stat-value" id="outTotalAkhir">Rp 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Subnet Calculator -->
+    <section id="network" class="tab-content">
+      <div class="section-title">
+        <h2>Kalkulator Subnet IPv4 (CIDR)</h2>
+        <p>Hitung alokasi blok jaringan dan host subnetting dengan presisi.</p>
+      </div>
+
+      <div class="grid-layout">
+        <div class="card form-card">
+          <div class="form-group">
+            <label for="ipAddress">IP Address</label>
+            <input type="text" id="ipAddress" value="192.168.1.1" placeholder="e.g. 192.168.1.1">
+          </div>
+          <div class="form-group">
+            <label for="cidr">Prefix CIDR (/)</label>
+            <input type="number" id="cidr" value="24" min="8" max="30">
+          </div>
+          <button class="btn btn-primary" onclick="hitungSubnet()">Kalkulasi Subnet</button>
+        </div>
+
+        <div class="card result-card">
+          <h3>Rincian Subnet</h3>
+          <div class="info-grid">
+            <div class="info-box">
+              <span>Subnet Mask</span>
+              <strong id="outNetmask">-</strong>
+            </div>
+            <div class="info-box">
+              <span>Network Address</span>
+              <strong id="outNetAddr">-</strong>
+            </div>
+            <div class="info-box">
+              <span>Broadcast Address</span>
+              <strong id="outBroadAddr">-</strong>
+            </div>
+            <div class="info-box">
+              <span>Usable Hosts</span>
+              <strong id="outUsableHost">-</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Cash Tracker -->
+    <section id="tracker" class="tab-content">
+      <div class="section-title">
+        <h2>Pencatat Kas Ringkas</h2>
+        <p>Kelola arus masuk dan keluar keuangan harian tanpa rumit.</p>
+      </div>
+
+      <div class="grid-layout">
+        <div class="card form-card">
+          <div class="form-group">
+            <label for="keterangan">Keterangan Transaksi</label>
+            <input type="text" id="keterangan" placeholder="Contoh: Honor Freelance, Bensin">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nominal">Nominal (Rp)</label>
+              <input type="number" id="nominal" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="tipe">Tipe</label>
+              <select id="tipe">
+                <option value="masuk">Pemasukan (+)</option>
+                <option value="keluar">Pengeluaran (-)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="tambahTransaksi()">Tambah Transaksi</button>
+        </div>
+
+        <div class="card history-card">
+          <div class="history-header">
+            <h3>Riwayat Transaksi</h3>
+            <div class="saldo-badge">
+              <span>Saldo Net:</span>
+              <strong id="outSaldo">Rp 0</strong>
+            </div>
+          </div>
+          <ul id="listTransaksi" class="transaksi-list"></ul>
+          <button class="btn btn-danger" onclick="hapusSemuaTransaksi()">Bersihkan Semua Data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Berita Dinamis -->
+    <section id="berita" class="tab-content">
+      <div class="section-title">
+        <h2>Berita Terkini Indonesia</h2>
+        <p>Pantau sajian kabar berita terbaru secara real-time.</p>
+      </div>
+      <div id="loading" class="loading-state">
+        <div class="spinner"></div>
+        <span>Memuat kabar berita terbaru...</span>
+      </div>
+      <div id="news-container" class="news-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>&copy; 2026 <strong>migu.my.id</strong> — Dirancang untuk memberikan manfaat praktis.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
